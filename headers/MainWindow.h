@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QLineEdit>
 #include <QLabel>
+#include "Account.h"
 class QPushButton;
 class QVBoxLayout;
 class MainWindow : public QWidget {
@@ -15,13 +16,16 @@ class MainWindow : public QWidget {
     ~MainWindow() override;
 
 private:
+    bool cardOk = false;
     QVBoxLayout *mainLayout;
     QGridLayout *keypadLayout;
-    QLabel *label;
-    QLineEdit *display;
+    QLabel *cardLabel,*pinLabel;
+    QLineEdit *cardDisplay,*pinDisplay;
     QVector<QPushButton *> keypad;
     QPushButton *confirmButton;
     QPushButton *backButton;
+    Account *account=nullptr;
+    std::vector<Account> accounts;
 private slots:
     void confirmClicked();
 };

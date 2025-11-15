@@ -15,7 +15,9 @@ find_package(Qt6 COMPONENTS
 
 add_executable(ATM_PROJEKT source/main.cpp
         source/MainWindow.cpp
-        headers/MainWindow.h)
+        headers/MainWindow.h
+        source/Account.cpp
+        headers/Account.h)
 target_link_libraries(ATM_PROJEKT
         Qt::Core
         Qt::Gui
