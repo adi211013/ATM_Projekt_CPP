@@ -18,12 +18,8 @@ class MainWindow : public QWidget {
 private:
     bool cardOk = false;
     QVBoxLayout *mainLayout;
-    QGridLayout *keypadLayout;
     QLabel *cardLabel,*pinLabel;
     QLineEdit *cardDisplay,*pinDisplay;
-    QVector<QPushButton *> keypad;
-    QPushButton *confirmButton;
-    QPushButton *backButton;
     std::vector<Account> accounts;
     int counter=0;
     int index=0;

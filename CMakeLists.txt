@@ -19,7 +19,9 @@ add_executable(ATM_PROJEKT source/main.cpp
         source/Account.cpp
         headers/Account.h
         source/AccountWindow.cpp
-        headers/AccountWindow.h)
+        headers/AccountWindow.h
+        source/KeypadWidget.cpp
+        headers/KeypadWidget.h)
 target_link_libraries(ATM_PROJEKT
         Qt::Core
         Qt::Gui
