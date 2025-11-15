@@ -24,8 +24,9 @@ private:
     QVector<QPushButton *> keypad;
     QPushButton *confirmButton;
     QPushButton *backButton;
-    Account *account=nullptr;
     std::vector<Account> accounts;
+    int counter=0;
+    int index=0;
 private slots:
     void confirmClicked();
 };

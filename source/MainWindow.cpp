@@ -1,6 +1,6 @@
 #include "../headers/MainWindow.h"
-
-
+#include <iostream>
+#include <QMessageBox>
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent){
     //tworzenie labeli
@@ -85,6 +85,52 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow() {
 }
 void MainWindow::confirmClicked() {
-//TODO:ogarniecie logowania i przejscie do nowego okna
+    if (!cardOk) {
+        bool foundCard = false;
+        accounts=Account::pullAccounts();
+        QString s_card=cardDisplay->text();
+        int i_card=s_card.toInt();
+        for (int i=0; i<accounts.size(); ++i) {
+            if (accounts[i].getCardNumber()==i_card) {
+                foundCard = true;
+                index=i;
+                break;
+            }
+        }
+        if (!foundCard) {
+            QMessageBox::critical(this,"Bledny numer karty","Podales bledny numer karty");
+            cardDisplay->clear();
+            return;
+        }
+        if (accounts[index].getBlocked()) {
+            cardDisplay->clear();
+            QMessageBox::critical(this,"Konto zablokowane","Konto zablokowane, skontaktuj sie z bankiem");
+        }
+        else {
+            cardOk=true;
+        }
 
+
+    }
+    else {
+        QString s_pin=pinDisplay->text();
+        int i_pin=s_pin.toInt();
+        if (accounts[index].getPin()==i_pin) {
+            QMessageBox::information(this,"Zalogowano","Zostales Zalogowany");
+        }
+        else if (counter==2) {
+            accounts[index].block();
+            QMessageBox::critical(this,"Konto zablokowane","Podales bledny pin 3 razy, konto zostanie zablokowane");
+            Account::pushAccounts(accounts);
+            cardOk=false;
+            pinDisplay->clear();
+            cardDisplay->clear();
+        }
+        else {
+            counter++;
+            pinDisplay->clear();
+            QMessageBox::critical(this,"Bledny pin","Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
+
+        }
+    }
 }

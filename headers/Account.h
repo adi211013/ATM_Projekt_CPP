@@ -21,6 +21,8 @@ class Account {
     int getBalance() const;
     bool getBlocked() const;
     static std::vector<Account> pullAccounts();
+    void block();
+    static void pushAccounts(const std::vector<Account> &accounts);
 };
 
 

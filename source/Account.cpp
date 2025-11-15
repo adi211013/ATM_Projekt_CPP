@@ -33,6 +33,10 @@ int Account::getBalance() const{
 bool Account::getBlocked() const {
     return blocked;
 }
+void Account::block() {
+    this->blocked = true;
+}
+
 std::vector<Account> Account::pullAccounts()
     {
         std::string s_cardNumber,sPin,sBalance,sBlocked;
@@ -63,3 +67,14 @@ std::vector<Account> Account::pullAccounts()
     file.close();
     return accounts;
     }
+ void Account::pushAccounts(const std::vector<Account> &accounts) {
+    std::ofstream file("accounts.txt");
+    if (!file.is_open()) {
+        std::cerr<<"Nie mozna otworzyc pliku"<<std::endl;
+        return;
+    }
+    for (const Account& acc:accounts) {
+        file<<acc.getCardNumber()<<";"<<acc.getPin()<<";"<<acc.getBalance()<<";"<<acc.getBlocked()<<std::endl;
+    }
+    file.close();
+}
