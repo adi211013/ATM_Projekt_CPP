@@ -17,7 +17,9 @@ add_executable(ATM_PROJEKT source/main.cpp
         source/MainWindow.cpp
         headers/MainWindow.h
         source/Account.cpp
-        headers/Account.h)
+        headers/Account.h
+        source/AccountWindow.cpp
+        headers/AccountWindow.h)
 target_link_libraries(ATM_PROJEKT
         Qt::Core
         Qt::Gui

@@ -27,6 +27,7 @@ private:
     std::vector<Account> accounts;
     int counter=0;
     int index=0;
+    void clear();
 private slots:
     void confirmClicked();
 };

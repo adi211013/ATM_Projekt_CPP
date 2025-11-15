@@ -1,6 +1,9 @@
 #include "../headers/MainWindow.h"
 #include <iostream>
 #include <QMessageBox>
+
+#include "../headers/AccountWindow.h"
+
 MainWindow::MainWindow(QWidget *parent)
     : QWidget(parent){
     //tworzenie labeli
@@ -117,6 +120,11 @@ void MainWindow::confirmClicked() {
         int i_pin=s_pin.toInt();
         if (accounts[index].getPin()==i_pin) {
             QMessageBox::information(this,"Zalogowano","Zostales Zalogowany");
+            AccountWindow* accountWindow=new AccountWindow(&accounts[index],this);
+            accountWindow->show();
+            this->hide();
+            clear();
+
         }
         else if (counter==2) {
             accounts[index].block();
@@ -133,4 +141,9 @@ void MainWindow::confirmClicked() {
 
         }
     }
+}
+void MainWindow::clear() {
+    cardOk=false;
+    counter=0;
+    index=0;
 }
