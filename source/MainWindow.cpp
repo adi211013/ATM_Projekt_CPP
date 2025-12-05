@@ -22,10 +22,6 @@ MainWindow::MainWindow(QWidget *parent)
     pinDisplay->setReadOnly(true);
     pinDisplay->setAlignment(Qt::AlignCenter);
     pinDisplay->setStyleSheet("font-size:24px;");
-    //tworzenie przyciskow
-    /*
-
-     */
     //linkowanie layoutow
     KeypadWidget* keypad=new KeypadWidget(this);
     mainLayout = new QVBoxLayout();
