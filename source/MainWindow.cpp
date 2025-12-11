@@ -88,6 +88,7 @@ void MainWindow::confirmClicked() {
         int i_pin=s_pin.toInt();
         if (accounts[index].getPin()==i_pin) {
             QMessageBox::information(this,"Zalogowano","Zostales Zalogowany");
+            accounts[index].checkAndResetLimits();
             AccountWindow* accountWindow=new AccountWindow(&accounts[index],this);
             accountWindow->show();
             this->hide();

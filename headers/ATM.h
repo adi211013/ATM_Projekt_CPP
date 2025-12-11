@@ -11,7 +11,7 @@ class ATM {
     std::map<int,int> inventory;
     public:
     static ATM pullATM();
-    static void pushATM(ATM a);
+    static void pushATM(ATM &atm);
     bool canPayOut(int amount, std::map<int,int>& out);
     void commitPayOut(std::map<int,int>& out);
 };
