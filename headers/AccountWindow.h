@@ -11,6 +11,9 @@
 #include <QLineEdit>
 #include <QLabel>
 #include "Account.h"
+#include "ATM.h"
+#include "KeypadWidget.h"
+
 class AccountWindow:public QWidget {
     Q_OBJECT
     public:
@@ -19,7 +22,15 @@ class AccountWindow:public QWidget {
     private:
     Account* account;
     QWidget* loginWindow;
-
+    ATM atm;
+    QLabel* balanceLabel;
+    QLabel* infoLabel;
+    QLineEdit* amountDisplay;
+    KeypadWidget* keypad;
+private slots:
+    void onDigitClicked(const QString& digit);
+    void onBackspaceClicked();
+    void onWithdrawClicked();
 };
 
 

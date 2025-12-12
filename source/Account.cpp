@@ -119,7 +119,7 @@ void Account::checkAndResetLimits() {
     }
 }
 
-bool Account::canWithdraw(int amount) const {
+bool Account::canWithdraw(const int amount) const {
     if (amount>balance)
         return false;
     if (amount>cardWithdrawalLimit)
@@ -128,7 +128,9 @@ bool Account::canWithdraw(int amount) const {
         return false;
     if (monthlyWithdrawnAmount+amount>monthlyWithdrawalLimit)
         return false;
-    if (amount%50!=0)
+    if (amount%10!=0)
+        return false;
+    if (amount<50)
         return false;
     return true;
 }

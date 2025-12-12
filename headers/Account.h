@@ -31,7 +31,7 @@ class Account {
     void block();
     static void pushAccounts(const std::vector<Account> &accounts);
     void checkAndResetLimits();
-    bool canWithdraw(int amount) const;
+    bool canWithdraw(const int amount) const;
     void recordWithdrawal(int amount);
 };
 

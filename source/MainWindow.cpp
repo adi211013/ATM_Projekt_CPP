@@ -80,8 +80,6 @@ void MainWindow::confirmClicked() {
         else {
             cardOk=true;
         }
-
-
     }
     else {
         QString s_pin=pinDisplay->text();
@@ -115,4 +113,6 @@ void MainWindow::clear() {
     cardOk=false;
     counter=0;
     index=0;
+    cardDisplay->clear();
+    pinDisplay->clear();
 }

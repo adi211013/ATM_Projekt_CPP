@@ -13,7 +13,7 @@ class ATM {
     static ATM pullATM();
     static void pushATM(ATM &atm);
     bool canPayOut(int amount, std::map<int,int>& out);
-    void commitPayOut(std::map<int,int>& out);
+    void commitPayOut(const std::map<int, int> &out);
 };
 
 
