@@ -7,136 +7,148 @@
 #include <iosfwd>
 #include <iostream>
 #include <sstream>
-Account::Account(int cardNumber, int pin, int balance,bool blocked,int dailyWithdrawalLimit,int monthlyWithdrawalLimit,int cardWithdrawalLimit,int dailyWithdrawnAmount,int monthlyWithdrawnAmount, QDate lastWithdrawalDate ) {
-    this ->cardNumber = cardNumber;
-    this->pin = pin;
-    this->balance = balance;
-    this->blocked = blocked;
-    this->dailyWithdrawalLimit = dailyWithdrawalLimit;
-    this->monthlyWithdrawalLimit = monthlyWithdrawalLimit;
-    this->dailyWithdrawnAmount = dailyWithdrawnAmount;
-    this->monthlyWithdrawnAmount = monthlyWithdrawnAmount;
-    this->cardWithdrawalLimit = cardWithdrawalLimit;
-    this->lastWithdrawalDate = lastWithdrawalDate;
 
+Account::Account(int cardNumber, int pin, int balance,
+                 bool blocked, int dailyWithdrawalLimit,
+                 int monthlyWithdrawalLimit, int cardWithdrawalLimit,
+                 int dailyWithdrawnAmount, int monthlyWithdrawnAmount,
+                 QDate lastWithdrawalDate)
+    : cardNumber(cardNumber), pin(pin),
+      balance(balance), blocked(blocked),
+      dailyWithdrawalLimit(dailyWithdrawalLimit), monthlyWithdrawalLimit(monthlyWithdrawalLimit)
+      , cardWithdrawalLimit(cardWithdrawalLimit), dailyWithdrawnAmount(dailyWithdrawnAmount),
+      monthlyWithdrawnAmount(monthlyWithdrawnAmount), lastWithdrawalDate(lastWithdrawalDate) {
 }
-Account::Account(int cardNumber, int pin) {
-    this->cardNumber = cardNumber;
-    this->pin = pin;
+
+Account::Account(): cardNumber(0), pin(0),
+                    balance(0), blocked(0),
+                    dailyWithdrawalLimit(0), monthlyWithdrawalLimit(0)
+                    , cardWithdrawalLimit(0), dailyWithdrawnAmount(0),
+                    monthlyWithdrawnAmount(0), lastWithdrawalDate(QDate::currentDate()) {
 }
-Account::Account(int cardNumber) {
-    this->cardNumber = cardNumber;
-}
-Account::Account(int cardNumber, int pin,int balance,bool blocked){
-        this->cardNumber = cardNumber;
-        this->pin = pin;
-        this->balance = balance;
-        this->blocked = blocked;
-    }
-int Account::getCardNumber() const{
+
+int Account::getCardNumber() const {
     return cardNumber;
 }
-int Account::getPin() const{
+
+int Account::getPin() const {
     return pin;
 }
-int Account::getBalance() const{
+
+int Account::getBalance() const {
     return balance;
 }
+
 bool Account::getBlocked() const {
     return blocked;
 }
+
 void Account::block() {
     this->blocked = true;
 }
 
-std::vector<Account> Account::pullAccounts()
-    {
-        std::string s_cardNumber,sPin,sBalance,sBlocked,sdailyWithdrawalLimit,smonthlyWithdrawalLimit,scardWithdrawalLimit,sdailyWithdrawnAmount,smonthlyWithdrawnAmount,slastWithdrawalDate;
-        std::vector<Account> accounts;
-        std::ifstream file("accounts.txt");
-        if (!file.is_open()) {
-            std::cerr<<"Nie mozna otworzyc pliku"<<std::endl;
-            return accounts;
+std::istream &operator>>(std::istream &file, Account &acc) {
+    std::string line;
+    if (std::getline(file >> std::ws, line)) {
+        std::stringstream ss(line);
+        std::string segment;
+        std::vector<std::string> data;
+        while (std::getline(ss, segment, ';')) {
+            data.push_back(segment);
         }
-        std::string line;
-        while (std::getline(file, line)) {
-            if (line.empty())
-                continue;
-            std::stringstream ss(line);
-            if (std::getline(ss,s_cardNumber,';')
-                && std::getline(ss, sPin, ';')
-                && std::getline(ss, sBalance,';')
-                &&std::getline(ss, sBlocked,';')
-                &&std::getline(ss, sdailyWithdrawalLimit,';')
-                &&std::getline(ss, smonthlyWithdrawalLimit,';')
-                &&std::getline(ss, scardWithdrawalLimit,';')
-                &&std::getline(ss, sdailyWithdrawnAmount,';')
-                &&std::getline(ss, smonthlyWithdrawnAmount,';')
-                &&std::getline(ss, slastWithdrawalDate)
-                ) {
-                try {
-                    int cardNumber=std::stoi(s_cardNumber);
-                    int pin=std::stoi(sPin);
-                    int balance=std::stoi(sBalance);
-                    bool blocked=std::stoi(sBlocked);
-                    int idailyWithdrawalLimit=std::stoi(sdailyWithdrawalLimit);
-                    int imonthlyWithdrawalLimit=std::stoi(smonthlyWithdrawalLimit);
-                    int icardWithdrawalLimit=std::stoi(scardWithdrawalLimit);
-                    int idailyWithdrawnAmount=std::stoi(sdailyWithdrawnAmount);
-                    int imonthlyWithdrawnAmount=std::stoi(smonthlyWithdrawnAmount);
-                    QString qsslastWithdrawalDate=QString::fromStdString(slastWithdrawalDate);
-                    QDate lastWithdrawalDate=QDate::fromString(qsslastWithdrawalDate,"dd-MM-yyyy");
-                    accounts.push_back(Account(cardNumber, pin, balance,blocked,idailyWithdrawalLimit,imonthlyWithdrawalLimit,icardWithdrawalLimit,idailyWithdrawnAmount,imonthlyWithdrawnAmount,lastWithdrawalDate));
-                }
-                catch(const std::exception& e) {
-                    std::cerr<<"Wystapil blad: "<<e.what()<<std::endl;
-                }
+        if (data.size() >= 10) {
+            try {
+                acc.cardNumber = std::stoi(data[0]);
+                acc.pin = std::stoi(data[1]);
+                acc.balance = std::stoi(data[2]);
+                acc.blocked = (std::stoi(data[3]) != 0);
+                acc.dailyWithdrawalLimit = std::stoi(data[4]);
+                acc.monthlyWithdrawalLimit = std::stoi(data[5]);
+                acc.cardWithdrawalLimit = std::stoi(data[6]);
+                acc.dailyWithdrawnAmount = std::stoi(data[7]);
+                acc.monthlyWithdrawnAmount = std::stoi(data[8]);
+                acc.lastWithdrawalDate = QDate::fromString(QString::fromStdString(data[9]), "dd-MM-yyyy");
+            } catch (...) {
+                file.setstate(std::ios::failbit);
             }
         }
+    }
+    return file;
+}
+
+std::vector<Account> Account::pullAccounts() {
+    std::vector<Account> accounts;
+    std::ifstream file("accounts.txt");
+    if (!file.is_open()) {
+        std::cerr << "Nie mozna otworzyc pliku" << std::endl;
+        return accounts;
+    }
+    Account temp;
+    while (file >> temp) {
+        accounts.push_back(temp);
+    }
     file.close();
     return accounts;
-    }
- void Account::pushAccounts(const std::vector<Account> &accounts) {
+}
+
+std::ostream &operator<<(std::ostream &file, const Account &acc) {
+    std::string sDate = acc.lastWithdrawalDate.toString("dd-MM-yyyy").toStdString();
+
+    file << acc.cardNumber << ";"
+            << acc.pin << ";"
+            << acc.balance << ";"
+            << (acc.blocked ? 1 : 0) << ";"
+            << acc.dailyWithdrawalLimit << ";"
+            << acc.monthlyWithdrawalLimit << ";"
+            << acc.cardWithdrawalLimit << ";"
+            << acc.dailyWithdrawnAmount << ";"
+            << acc.monthlyWithdrawnAmount << ";"
+            << sDate;
+    return file;
+}
+
+void Account::pushAccounts(const std::vector<Account> &accounts) {
     std::ofstream file("accounts.txt");
     if (!file.is_open()) {
-        std::cerr<<"Nie mozna otworzyc pliku"<<std::endl;
+        std::cerr << "Nie mozna otworzyc pliku" << std::endl;
         return;
     }
-    for (const Account& acc:accounts) {
-        QString qslastWithdrawalDate=acc.lastWithdrawalDate.toString("dd-MM-yyyy");
-        std::string slastWithdrawalDate=qslastWithdrawalDate.toStdString();
-        file<<acc.cardNumber<<";"<<acc.pin<<";"<<acc.balance<<";"<<acc.blocked<<";"<<acc.dailyWithdrawalLimit<<";"<<acc.monthlyWithdrawalLimit<<";"<<acc.cardWithdrawalLimit<<";"<<acc.dailyWithdrawnAmount<<";"<<acc.monthlyWithdrawnAmount<<";"<<slastWithdrawalDate<<std::endl;
+    for (const Account &acc: accounts) {
+        file << acc << std::endl;
     }
     file.close();
 }
+
 void Account::checkAndResetLimits() {
     QDate now = QDate::currentDate();
-    if (lastWithdrawalDate.month()!=now.month() || (lastWithdrawalDate.year()!=now.year() && lastWithdrawalDate.month()==now.month())) {
-        monthlyWithdrawnAmount=0;
+    if (lastWithdrawalDate.month() != now.month() || (
+            lastWithdrawalDate.year() != now.year() && lastWithdrawalDate.month() == now.month())) {
+        monthlyWithdrawnAmount = 0;
     }
-    if (lastWithdrawalDate!=now) {
-        dailyWithdrawnAmount=0;
+    if (lastWithdrawalDate != now) {
+        dailyWithdrawnAmount = 0;
     }
 }
 
 bool Account::canWithdraw(const int amount) const {
-    if (amount>balance)
+    if (amount > balance)
         return false;
-    if (amount>cardWithdrawalLimit)
+    if (amount > cardWithdrawalLimit)
         return false;
-    if (dailyWithdrawnAmount+amount>dailyWithdrawalLimit)
+    if (dailyWithdrawnAmount + amount > dailyWithdrawalLimit)
         return false;
-    if (monthlyWithdrawnAmount+amount>monthlyWithdrawalLimit)
+    if (monthlyWithdrawnAmount + amount > monthlyWithdrawalLimit)
         return false;
-    if (amount%10!=0)
+    if (amount % 10 != 0)
         return false;
-    if (amount<50)
+    if (amount < 50)
         return false;
     return true;
 }
+
 void Account::recordWithdrawal(int amount) {
-    balance-=amount;
-    dailyWithdrawnAmount+=amount;
-    monthlyWithdrawnAmount+=amount;
-    lastWithdrawalDate=QDate::currentDate();
+    balance -= amount;
+    dailyWithdrawnAmount += amount;
+    monthlyWithdrawnAmount += amount;
+    lastWithdrawalDate = QDate::currentDate();
 }
