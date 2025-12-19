@@ -56,21 +56,23 @@ void ATM::pushATM(ATM &atm) {
 
 bool ATM::canPayOut(int amount, std::map<int, int> &out) {
     out.clear();
-    int remaining = amount;
-    for (auto &[fst, snd]: std::ranges::reverse_view(inventory)) {
-        int nominal = fst;
-        int count = snd;
-        if (remaining == 0) break;
-        if (count == 0) continue;
-        if (nominal > remaining) continue;
-        int needed = remaining / nominal;
-        int toGive = std::min(needed, count);
-        out[nominal] = toGive;
-        remaining -= (toGive * nominal);
-    }
-    return (remaining == 0);
+    return solve(amount, inventory.rbegin(), inventory.rend(), out);
 }
-
+bool ATM::solve(int remaining, std::map<int, int>::reverse_iterator it, std::map<int, int>::reverse_iterator end, std::map<int, int>& out) {
+    if (remaining == 0) return true;
+    if (it == end) return false;
+    int nominal = it->first;
+    int count = it->second;
+    int maxTake = std::min(remaining / nominal, count);
+    for (int i = maxTake; i >= 0; --i) {
+        out[nominal] = i;
+        if (solve(remaining - (i * nominal), std::next(it), end, out)) {
+            return true;
+        }
+    }
+    out[nominal] = 0;
+    return false;
+}
 void ATM::commitPayOut(const std::map<int, int> &out) {
     for (auto const &[nominal, count]: out) {
         inventory[nominal] -= count;

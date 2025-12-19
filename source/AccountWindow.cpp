@@ -6,18 +6,15 @@
 
 #include <QMessageBox>
 
-AccountWindow::AccountWindow(Account* account, QWidget* loginWindow, QWidget* parent)
-    : QWidget(parent), account(account), loginWindow(loginWindow)
-{
-    atm=ATM::pullATM();
-
+AccountWindow::AccountWindow(BankSystem *bankSystem, QWidget *loginWindow, QWidget *parent)
+    : QWidget(parent), bankSystem(bankSystem), loginWindow(loginWindow) {
     setWindowTitle("Bankomat");
     resize(1200, 800);
 
     balanceLabel = new QLabel(this);
     balanceLabel->setAlignment(Qt::AlignCenter);
     balanceLabel->setStyleSheet("font-size: 22px; font-weight: bold; color: #4CAF50;");
-    balanceLabel->setText("Dostępne środki: " + QString::number(account->getBalance()) + " PLN");
+    balanceLabel->setText("Dostępne środki: " + QString::number(bankSystem->getBalance()) + " PLN");
 
     infoLabel = new QLabel("Wpisz kwote do wypłaty:", this);
     infoLabel->setAlignment(Qt::AlignCenter);
@@ -31,26 +28,27 @@ AccountWindow::AccountWindow(Account* account, QWidget* loginWindow, QWidget* pa
 
     keypad = new KeypadWidget(this);
 
-    QVBoxLayout* mainLayout = new QVBoxLayout(this);
+    QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(balanceLabel);
     mainLayout->addWidget(infoLabel);
     mainLayout->addWidget(amountDisplay);
     mainLayout->addWidget(keypad);
 
-    mainLayout->setStretch(0,0);
-    mainLayout->setStretch(1,0);
-    mainLayout->setStretch(2,1);
-    mainLayout->setStretch(3,2);
+    mainLayout->setStretch(0, 0);
+    mainLayout->setStretch(1, 0);
+    mainLayout->setStretch(2, 1);
+    mainLayout->setStretch(3, 2);
 
     connect(keypad, &KeypadWidget::digitClicked, this, &AccountWindow::onDigitClicked);
     connect(keypad, &KeypadWidget::backClicked, this, &AccountWindow::onBackspaceClicked);
     connect(keypad, &KeypadWidget::confirmClicked, this, &AccountWindow::onWithdrawClicked);
-
 }
-AccountWindow::~AccountWindow() {}
 
-void AccountWindow::onDigitClicked(const QString& digit) {
-        amountDisplay->setText(amountDisplay->text() + digit);
+AccountWindow::~AccountWindow() {
+}
+
+void AccountWindow::onDigitClicked(const QString &digit) {
+    amountDisplay->setText(amountDisplay->text() + digit);
 }
 
 void AccountWindow::onBackspaceClicked() {
@@ -58,38 +56,29 @@ void AccountWindow::onBackspaceClicked() {
 }
 
 void AccountWindow::onWithdrawClicked() {
-    QString sAmount = amountDisplay->text();
-    if (sAmount.isEmpty()) return;
-    int amount = sAmount.toInt();
-    if (!account->canWithdraw(amount)) {
+    int amount = amountDisplay->text().toInt();
+    std::map<int, int> notesToGive;
+    int result = bankSystem->withdraw(amount, notesToGive);
+    if (result == 1) {
         QMessageBox::critical(this, "Błąd wypłaty",
-            "Nie można wypłacić takiej kwoty.\n");
+                              "Nie można wypłacić takiej kwoty.\n");
         amountDisplay->clear();
         return;
     }
-    std::map<int, int> notesToGive;
-    if (!atm.canPayOut(amount, notesToGive)) {
-         QMessageBox::critical(this, "Błąd bankomatu",
-            "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
-         return;
+    if (result == 2) {
+        QMessageBox::critical(this, "Błąd bankomatu",
+                              "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
+        return;
     }
-    account->recordWithdrawal(amount);
-    atm.commitPayOut(notesToGive);
-    std::vector<Account> allAccounts = Account::pullAccounts();
-    for(auto &acc : allAccounts) {
-        if(acc.getCardNumber() == account->getCardNumber()) {
-            acc = *account;
-            break;
+    if (result == 0) {
+        QString info = "Wypłacono: " + QString::number(amount) + " PLN\n\n";
+        info += "Nominały:\n";
+        for (auto const &[nominal, count]: notesToGive) {
+            info += QString::number(nominal) + " PLN x " + QString::number(count) + "\n";
         }
+        QMessageBox::information(this, "Gotówka", info);
+        amountDisplay->clear();
+        loginWindow->show();
+        this->close();
     }
-    Account::pushAccounts(allAccounts);
-    QString info = "Wypłacono: " + QString::number(amount) + " PLN\n\n";
-    info += "Nominały:\n";
-    for (auto const& [nominal, count] : notesToGive) {
-        info += QString::number(nominal) + " PLN x " + QString::number(count) + "\n";
-    }
-    QMessageBox::information(this, "Gotówka", info);
-    amountDisplay->clear();
-    loginWindow->show();
-    this->close();
 }

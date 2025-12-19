@@ -2,8 +2,8 @@
 // Created by adi on 11/15/25.
 //
 
-#ifndef KEYPADWIDGET_H
-#define KEYPADWIDGET_H
+#pragma once
+
 #include <QWidget>
 #include <QGridLayout>
 #include <QPushButton>
@@ -28,4 +28,3 @@ class KeypadWidget:public QWidget{
 
 
 
-#endif //KEYPADWIDGET_H

@@ -2,8 +2,8 @@
 // Created by adi on 11/15/25.
 //
 
-#ifndef ACCOUNTS_H
-#define ACCOUNTS_H
+#pragma once
+
 #include <vector>
 #include <QDate>
 
@@ -38,4 +38,3 @@ class Account {
 
 
 
-#endif //ACCOUNTS_H

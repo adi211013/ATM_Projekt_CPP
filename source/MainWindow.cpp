@@ -6,7 +6,9 @@
 #include "../headers/KeypadWidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent){
+    : QWidget(parent) {
+    bankSystem = new BankSystem();
+    cardOk = false;
     //tworzenie labeli
     cardLabel = new QLabel("Podaj numer karty", this);
     cardLabel->setAlignment(Qt::AlignCenter);
@@ -23,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     pinDisplay->setAlignment(Qt::AlignCenter);
     pinDisplay->setStyleSheet("font-size:24px;");
     //linkowanie layoutow
-    KeypadWidget* keypad=new KeypadWidget(this);
+    KeypadWidget *keypad = new KeypadWidget(this);
     mainLayout = new QVBoxLayout();
     mainLayout->addWidget(cardLabel);
     mainLayout->addWidget(cardDisplay);
@@ -42,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
             pinDisplay->backspace();
     });
     connect(keypad, &KeypadWidget::confirmClicked, this, &MainWindow::confirmClicked);
-    connect(keypad, &KeypadWidget::digitClicked, this, [this](const QString& number) {
+    connect(keypad, &KeypadWidget::digitClicked, this, [this](const QString &number) {
         if (!cardOk)
             cardDisplay->setText(cardDisplay->text() + number);
         else
@@ -55,64 +57,44 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow() {
 }
+
 void MainWindow::confirmClicked() {
     if (!cardOk) {
-        bool foundCard = false;
-        accounts=Account::pullAccounts();
-        QString s_card=cardDisplay->text();
-        int i_card=s_card.toInt();
-        for (int i=0; i<accounts.size(); ++i) {
-            if (accounts[i].getCardNumber()==i_card) {
-                foundCard = true;
-                index=i;
-                break;
-            }
-        }
-        if (!foundCard) {
-            QMessageBox::critical(this,"Bledny numer karty","Podales bledny numer karty");
+        int cardNumber = cardDisplay->text().toInt();
+        int result = bankSystem->enterCard(cardNumber);
+        if (result == 1) {
+            QMessageBox::critical(this, "Bledny numer karty", "Podales bledny numer karty");
             cardDisplay->clear();
             return;
         }
-        if (accounts[index].getBlocked()) {
+        if (result == 2) {
             cardDisplay->clear();
-            QMessageBox::critical(this,"Konto zablokowane","Konto zablokowane, skontaktuj sie z bankiem");
+            QMessageBox::critical(this, "Konto zablokowane", "Konto zablokowane, skontaktuj sie z bankiem");
+        } else {
+            cardOk = true;
         }
-        else {
-            cardOk=true;
-        }
-    }
-    else {
-        QString s_pin=pinDisplay->text();
-        int i_pin=s_pin.toInt();
-        if (accounts[index].getPin()==i_pin) {
-            QMessageBox::information(this,"Zalogowano","Zostales Zalogowany");
-            accounts[index].checkAndResetLimits();
-            AccountWindow* accountWindow=new AccountWindow(&accounts[index],this);
+    } else {
+        int pin = pinDisplay->text().toInt();
+        int result = bankSystem->enterPin(pin);
+        if (result == 0) {
+            QMessageBox::information(this, "Zalogowano", "Zostales Zalogowany");
+            AccountWindow *accountWindow = new AccountWindow(bankSystem, this);
             accountWindow->show();
             this->hide();
             clear();
-
-        }
-        else if (counter==2) {
-            accounts[index].block();
-            QMessageBox::critical(this,"Konto zablokowane","Podales bledny pin 3 razy, konto zostanie zablokowane");
-            Account::pushAccounts(accounts);
-            cardOk=false;
+        } else if (result == 2) {
+            QMessageBox::critical(this, "Konto zablokowane", "Podales bledny pin 3 razy, konto zostanie zablokowane");
+            this->clear();
+        } else if (result == 1) {
             pinDisplay->clear();
-            cardDisplay->clear();
-        }
-        else {
-            counter++;
-            pinDisplay->clear();
-            QMessageBox::critical(this,"Bledny pin","Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
-
+            QMessageBox::critical(this, "Bledny pin",
+                                  "Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
         }
     }
 }
+
 void MainWindow::clear() {
-    cardOk=false;
-    counter=0;
-    index=0;
+    cardOk = false;
     cardDisplay->clear();
     pinDisplay->clear();
 }
