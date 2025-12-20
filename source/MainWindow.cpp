@@ -99,6 +99,11 @@ void MainWindow::confirmClicked() {
                 QMessageBox::critical(this, "Konto zablokowane", "Podales bledny pin 3 razy, konto zostanie zablokowane");
                 clear();
                 break;
+            case LoginResult::AccountError:
+                QMessageBox::critical(this, "Wystapil problem", "Wpisz ponownie numer karty");
+                cardOk = false;
+                pinDisplay->clear();
+                cardDisplay->clear();
             default:
                 QMessageBox::critical(this, "Wystapil problem", "");
         }

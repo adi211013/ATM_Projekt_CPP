@@ -54,6 +54,8 @@ int BankSystem::getFailedAttempts() {
 }
 
 WithdrawResult BankSystem::withdraw(int amount, std::map<int, int> &outNotes) {
+    if (currentAccount == nullptr)
+        return WithdrawResult::AuthError;
     if (!currentAccount->canWithdraw(amount))
         return WithdrawResult::InvalidAmount;
     if (!atm.canPayOut(amount, outNotes))

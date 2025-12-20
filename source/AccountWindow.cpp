@@ -82,6 +82,11 @@ void AccountWindow::onWithdrawClicked() {
                       "Nie można wypłacić takiej kwoty.\n");
             amountDisplay->clear();
             break;
+        case WithdrawResult::AuthError:
+            QMessageBox::critical(this, "Błąd sesji","Wystapil blad autoryzacji, zaloguj sie ponownie");
+            this->close();
+            loginWindow->show();
+            break;
         default:
                 QMessageBox::critical(this, "Wystapil problem", "");
     }

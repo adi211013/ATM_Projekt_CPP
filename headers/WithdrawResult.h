@@ -6,6 +6,7 @@
 enum class WithdrawResult {
     Success=0,
     ATMError=1,
-    InvalidAmount=2
+    InvalidAmount=2,
+    AuthError=3
 };
 
