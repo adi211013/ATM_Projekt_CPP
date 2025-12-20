@@ -58,27 +58,31 @@ void AccountWindow::onBackspaceClicked() {
 void AccountWindow::onWithdrawClicked() {
     int amount = amountDisplay->text().toInt();
     std::map<int, int> notesToGive;
-    int result = bankSystem->withdraw(amount, notesToGive);
-    if (result == 1) {
-        QMessageBox::critical(this, "Błąd wypłaty",
-                              "Nie można wypłacić takiej kwoty.\n");
-        amountDisplay->clear();
-        return;
-    }
-    if (result == 2) {
-        QMessageBox::critical(this, "Błąd bankomatu",
-                              "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
-        return;
-    }
-    if (result == 0) {
-        QString info = "Wypłacono: " + QString::number(amount) + " PLN\n\n";
-        info += "Nominały:\n";
-        for (auto const &[nominal, count]: notesToGive) {
-            info += QString::number(nominal) + " PLN x " + QString::number(count) + "\n";
+    WithdrawResult result = bankSystem->withdraw(amount, notesToGive);
+    switch (result) {
+        case WithdrawResult::Success: {
+            QString info = "Wypłacono: " + QString::number(amount) + " PLN\n\n";
+            info += "Nominały:\n";
+            for (auto const &[nominal, count]: notesToGive) {
+                if (count !=0)
+                    info += QString::number(nominal) + " PLN x " + QString::number(count) + "\n";
+            }
+            QMessageBox::information(this, "Gotówka", info);
+            amountDisplay->clear();
+            loginWindow->show();
+            this->close();
+            break;
         }
-        QMessageBox::information(this, "Gotówka", info);
-        amountDisplay->clear();
-        loginWindow->show();
-        this->close();
+        case WithdrawResult::ATMError:
+            QMessageBox::critical(this, "Błąd bankomatu",
+                              "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
+            break;
+        case WithdrawResult::InvalidAmount:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                      "Nie można wypłacić takiej kwoty.\n");
+            amountDisplay->clear();
+            break;
+        default:
+                QMessageBox::critical(this, "Wystapil problem", "");
     }
 }

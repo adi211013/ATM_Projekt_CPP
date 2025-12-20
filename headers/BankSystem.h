@@ -7,6 +7,8 @@
 
 #include "Account.h"
 #include "ATM.h"
+#include "LoginResult.h"
+#include "WithdrawResult.h"
 
 
 class BankSystem {
@@ -18,10 +20,10 @@ class BankSystem {
     public:
     BankSystem();
     ~BankSystem();
-    int enterCard(int cardNumber);
-    int enterPin(int pin);
+    LoginResult enterCard(int cardNumber);
+    LoginResult enterPin(int pin);
     int getFailedAttempts();
-    int withdraw(int amount,std::map<int, int>& outNotes);
+    WithdrawResult withdraw(int amount,std::map<int, int>& outNotes);
     int getBalance();
 
 };

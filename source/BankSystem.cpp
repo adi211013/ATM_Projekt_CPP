@@ -17,50 +17,50 @@ BankSystem::~BankSystem() {
     Account::pushAccounts(accounts);
 }
 
-int BankSystem::enterCard(int cardNumber) {
+LoginResult BankSystem::enterCard(int cardNumber) {
     pendingAccount = nullptr;
     failedAttempts = 0;
     auto it = std::ranges::find_if(accounts, [cardNumber](const Account &acc) {
         return acc.getCardNumber() == cardNumber;
     });
     if (it == accounts.end())
-        return 1;
+        return LoginResult::InvalidCardNumber;
     if (it->getBlocked())
-        return 2;
+        return LoginResult::Blocked;
     pendingAccount = &(*it);
-    return 0;
+    return LoginResult::Success;
 }
 
-int BankSystem::enterPin(int pin) {
-    if (pendingAccount == nullptr) return 4;
+LoginResult BankSystem::enterPin(int pin) {
+    if (pendingAccount == nullptr) return LoginResult::AccountError;
     if (pendingAccount->getPin() == pin) {
         currentAccount = pendingAccount;
         pendingAccount = nullptr;
         currentAccount->checkAndResetLimits();
-        return 0;
+        return LoginResult::Success;
     }
     failedAttempts++;
     if (failedAttempts >= 3) {
         pendingAccount->block();
         Account::pushAccounts(accounts);
         pendingAccount = nullptr;
-        return 2;
+        return LoginResult::Blocked;
     }
-    return 1;
+    return LoginResult::InvalidPin;
 }
 
 int BankSystem::getFailedAttempts() {
     return failedAttempts;
 }
 
-int BankSystem::withdraw(int amount, std::map<int, int> &outNotes) {
+WithdrawResult BankSystem::withdraw(int amount, std::map<int, int> &outNotes) {
     if (!currentAccount->canWithdraw(amount))
-        return 1;
+        return WithdrawResult::InvalidAmount;
     if (!atm.canPayOut(amount, outNotes))
-        return 2;
+        return WithdrawResult::ATMError;
     currentAccount->recordWithdrawal(amount);
     atm.commitPayOut(outNotes);
-    return 0;
+    return WithdrawResult::Success;
 }
 
 int BankSystem::getBalance() {

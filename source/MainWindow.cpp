@@ -61,34 +61,46 @@ MainWindow::~MainWindow() {
 void MainWindow::confirmClicked() {
     if (!cardOk) {
         int cardNumber = cardDisplay->text().toInt();
-        int result = bankSystem->enterCard(cardNumber);
-        if (result == 1) {
-            QMessageBox::critical(this, "Bledny numer karty", "Podales bledny numer karty");
-            cardDisplay->clear();
-            return;
+        LoginResult result = bankSystem->enterCard(cardNumber);
+        switch (result) {
+            case LoginResult::Success:
+                cardOk = true;
+                break;
+            case LoginResult::InvalidCardNumber:
+                QMessageBox::critical(this, "Bledny numer karty", "Podales bledny numer karty");
+                cardDisplay->clear();
+                break;
+            case LoginResult::Blocked:
+                cardDisplay->clear();
+                QMessageBox::critical(this, "Konto zablokowane", "Konto zablokowane, skontaktuj sie z bankiem");
+                break;
+            default:
+                cardDisplay->clear();
+                QMessageBox::critical(this, "Wystapil problem", "");
         }
-        if (result == 2) {
-            cardDisplay->clear();
-            QMessageBox::critical(this, "Konto zablokowane", "Konto zablokowane, skontaktuj sie z bankiem");
-        } else {
-            cardOk = true;
-        }
-    } else {
+    }
+    else {
         int pin = pinDisplay->text().toInt();
-        int result = bankSystem->enterPin(pin);
-        if (result == 0) {
-            QMessageBox::information(this, "Zalogowano", "Zostales Zalogowany");
-            AccountWindow *accountWindow = new AccountWindow(bankSystem, this);
-            accountWindow->show();
-            this->hide();
-            clear();
-        } else if (result == 2) {
-            QMessageBox::critical(this, "Konto zablokowane", "Podales bledny pin 3 razy, konto zostanie zablokowane");
-            this->clear();
-        } else if (result == 1) {
-            pinDisplay->clear();
-            QMessageBox::critical(this, "Bledny pin",
-                                  "Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
+        LoginResult result = bankSystem->enterPin(pin);
+        switch (result) {
+            case LoginResult::Success: {
+                QMessageBox::information(this, "Zalogowano", "Zostales Zalogowany");
+                AccountWindow *accountWindow = new AccountWindow(bankSystem, this);
+                accountWindow->show();
+                this->hide();
+                clear();
+                break;
+            }
+            case LoginResult::InvalidPin:
+                pinDisplay->clear();
+                QMessageBox::critical(this, "Bledny pin","Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
+                break;
+            case LoginResult::Blocked:
+                QMessageBox::critical(this, "Konto zablokowane", "Podales bledny pin 3 razy, konto zostanie zablokowane");
+                clear();
+                break;
+            default:
+                QMessageBox::critical(this, "Wystapil problem", "");
         }
     }
 }

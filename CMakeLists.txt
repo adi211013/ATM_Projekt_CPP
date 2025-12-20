@@ -25,7 +25,9 @@ add_executable(ATM_PROJEKT source/main.cpp
         source/ATM.cpp
         headers/ATM.h
         source/BankSystem.cpp
-        headers/BankSystem.h)
+        headers/BankSystem.h
+        headers/WithdrawResult.h
+        headers/LoginResult.h)
 target_link_libraries(ATM_PROJEKT
         Qt::Core
         Qt::Gui
