@@ -1,4 +1,4 @@
-//
+﻿//
 // Created by adi on 12/19/25.
 //
 
@@ -57,75 +57,38 @@ int BankSystem::getFailedAttempts() {
     return failedAttempts;
 }
 
-WithdrawResult BankSystem::withdraw(int amount, std::map<int, int> &outNotes) {
+WithdrawResult BankSystem::withdraw(int amount, std::map<int, int>& outNotes) {
     std::ofstream logFile("history.log", std::ios::app);
-    if (currentAccount == nullptr)
-        return WithdrawResult::AuthError;
-
+    if (currentAccount == nullptr) return WithdrawResult::AuthError;
+    int cardNum = currentAccount->getCardNumber();
+    WithdrawResult accStatus = currentAccount->canWithdraw(amount);
+    if (accStatus != WithdrawResult::Success) {
+        if (logFile.is_open()) {
+            std::string msg = "FAIL: Nieznany blad";
+            switch (accStatus) {
+            case WithdrawResult::InsufficientFunds: msg = "FAIL: Brak srodkow"; break;
+            case WithdrawResult::DailyLimitExceeded: msg = "FAIL: Limit dzienny"; break; // Tu był błąd SUCCESS
+            case WithdrawResult::MonthlyLimitExceeded: msg = "FAIL: Limit miesieczny"; break;
+            case WithdrawResult::CardLimitExceeded: msg = "FAIL: Limit karty"; break;
+            case WithdrawResult::AmountNotDivisible: msg = "FAIL: Kwota niepodzielna przez 10"; break;
+            case WithdrawResult::AmountTooLow: msg = "FAIL: Kwota ponizej 50zl"; break;
+            default: break;
+            }
+            logFile << TransactionLog(cardNum, amount, msg);
+        }
+        return accStatus;
+    }
     if (!atm.canPayOut(amount, outNotes)) {
         if (logFile.is_open())
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: brak banknotow");
-        logFile.close();
+            logFile << TransactionLog(cardNum, amount, "FAIL: Brak banknotow w maszynie");
         return WithdrawResult::ATMError;
     }
-	WithdrawResult canWithdrawResult = currentAccount->canWithdraw(amount);
-    switch (canWithdrawResult)
-    {   
-    case WithdrawResult::Success:
-         currentAccount->recordWithdrawal(amount);
-        atm.commitPayOut(outNotes);
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "SUCCESS: Wyplata zrealizowana");
-            logFile.close();
-        }
-        return WithdrawResult::Success;
-        break;
-    case WithdrawResult::InsufficientFunds:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Nie ma wystarczajacych srodkow na koncie");
-            logFile.close();
-        }
-        return WithdrawResult::InsufficientFunds;
-        break;
-    case WithdrawResult::DailyLimitExceeded:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Przekroczony dzienny limit wyplat");
-            logFile.close();
-        }
-        return WithdrawResult::DailyLimitExceeded;
-        break;
-    case WithdrawResult::MonthlyLimitExceeded:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Przekroczony miesieczny limit wyplat");
-            logFile.close();
-        }
-        return WithdrawResult::MonthlyLimitExceeded;
-        break;
-    case WithdrawResult::CardLimitExceeded:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Przekroczono limit jednorazowej wyplaty karty");
-            logFile.close();
-        }
-        return WithdrawResult::CardLimitExceeded;
-        break;
-    case WithdrawResult::AmountNotDivisible:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Nie mozna wyplacic kwoty nie dzielacej sie przez 10");
-            logFile.close();
-        }
-        return WithdrawResult::AmountNotDivisible;
-        break;
-    case WithdrawResult::AmountTooLow:
-        if (logFile.is_open()) {
-            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Nie mozna wyplacic kwoty mniejszej od 50zl");
-            logFile.close();
-        }
-        return WithdrawResult::AmountTooLow;
-        break;
-    default:
-        return WithdrawResult::AuthError;
-        break;
+    currentAccount->recordWithdrawal(amount);
+    atm.commitPayOut(outNotes);
+    if (logFile.is_open()) {
+        logFile << TransactionLog(cardNum, amount, "SUCCESS: Wyplata zrealizowana");
     }
+    return WithdrawResult::Success;
 }
 
 int BankSystem::getBalance() {
