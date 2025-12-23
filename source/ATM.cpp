@@ -8,6 +8,7 @@
 #include <ranges>
 #include <sstream>
 #include <iostream>
+
 ATM ATM::pullATM() {
     ATM atm;
     std::ifstream file("atm.txt");
@@ -58,7 +59,9 @@ bool ATM::canPayOut(int amount, std::map<int, int> &out) {
     out.clear();
     return solve(amount, inventory.rbegin(), inventory.rend(), out);
 }
-bool ATM::solve(int remaining, std::map<int, int>::reverse_iterator it, std::map<int, int>::reverse_iterator end, std::map<int, int>& out) {
+
+bool ATM::solve(int remaining, std::map<int, int>::reverse_iterator it, std::map<int, int>::reverse_iterator end,
+                std::map<int, int> &out) {
     if (remaining == 0) return true;
     if (it == end) return false;
     int nominal = it->first;
@@ -73,6 +76,7 @@ bool ATM::solve(int remaining, std::map<int, int>::reverse_iterator it, std::map
     out[nominal] = 0;
     return false;
 }
+
 void ATM::commitPayOut(const std::map<int, int> &out) {
     for (auto const &[nominal, count]: out) {
         inventory[nominal] -= count;

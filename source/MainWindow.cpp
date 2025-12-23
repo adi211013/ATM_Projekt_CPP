@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow() {
+    delete bankSystem;
 }
 
 void MainWindow::confirmClicked() {
@@ -78,8 +79,7 @@ void MainWindow::confirmClicked() {
                 cardDisplay->clear();
                 QMessageBox::critical(this, "Wystapil problem", "");
         }
-    }
-    else {
+    } else {
         int pin = pinDisplay->text().toInt();
         LoginResult result = bankSystem->enterPin(pin);
         switch (result) {
@@ -93,10 +93,12 @@ void MainWindow::confirmClicked() {
             }
             case LoginResult::InvalidPin:
                 pinDisplay->clear();
-                QMessageBox::critical(this, "Bledny pin","Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
+                QMessageBox::critical(this, "Bledny pin",
+                                      "Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
                 break;
             case LoginResult::Blocked:
-                QMessageBox::critical(this, "Konto zablokowane", "Podales bledny pin 3 razy, konto zostanie zablokowane");
+                QMessageBox::critical(this, "Konto zablokowane",
+                                      "Podales bledny pin 3 razy, konto zostanie zablokowane");
                 clear();
                 break;
             case LoginResult::AccountError:

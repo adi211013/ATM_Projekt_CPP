@@ -24,6 +24,14 @@ private:
     QLabel *infoLabel;
     QLineEdit *amountDisplay;
     KeypadWidget *keypad;
+    QVBoxLayout *mainLayout;
+    QWidget *fastPaymentContainer;
+    QGridLayout *fastPaymentLayout;
+    QPushButton *button50;
+    QPushButton *button100;
+    QPushButton *button200;
+    QPushButton *button500;
+    QPushButton *otherButton;
 
 private slots:
     void onDigitClicked(const QString &digit);

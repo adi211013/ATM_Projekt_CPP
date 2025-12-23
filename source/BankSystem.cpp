@@ -4,6 +4,10 @@
 
 #include "../headers/BankSystem.h"
 
+#include <fstream>
+
+#include "../headers/TransactionLog.h"
+
 BankSystem::BankSystem() {
     atm = ATM::pullATM();
     accounts = Account::pullAccounts();
@@ -54,14 +58,26 @@ int BankSystem::getFailedAttempts() {
 }
 
 WithdrawResult BankSystem::withdraw(int amount, std::map<int, int> &outNotes) {
+    std::ofstream logFile("history.log", std::ios::app);
     if (currentAccount == nullptr)
         return WithdrawResult::AuthError;
-    if (!currentAccount->canWithdraw(amount))
+    if (!currentAccount->canWithdraw(amount)) {
+        if (logFile.is_open())
+            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: Nie wystarczajace srodki");
+        logFile.close();
         return WithdrawResult::InvalidAmount;
-    if (!atm.canPayOut(amount, outNotes))
+    }
+    if (!atm.canPayOut(amount, outNotes)) {
+        if (logFile.is_open())
+            logFile << TransactionLog(currentAccount->getCardNumber(), amount, "FAIL: brak banknotow");
+        logFile.close();
         return WithdrawResult::ATMError;
+    }
     currentAccount->recordWithdrawal(amount);
     atm.commitPayOut(outNotes);
+    if (logFile.is_open())
+        logFile << TransactionLog(currentAccount->getCardNumber(), amount, "SUCCESS: Wyplata zrealizowana");
+    logFile.close();
     return WithdrawResult::Success;
 }
 

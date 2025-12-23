@@ -14,19 +14,22 @@
 class BankSystem {
     std::vector<Account> accounts;
     ATM atm;
-    Account* currentAccount;
-    Account* pendingAccount;
+    Account *currentAccount;
+    Account *pendingAccount;
     int failedAttempts;
-    public:
+
+public:
     BankSystem();
+
     ~BankSystem();
+
     LoginResult enterCard(int cardNumber);
+
     LoginResult enterPin(int pin);
+
     int getFailedAttempts();
-    WithdrawResult withdraw(int amount,std::map<int, int>& outNotes);
+
+    WithdrawResult withdraw(int amount, std::map<int, int> &outNotes);
+
     int getBalance();
-
 };
-
-
-
