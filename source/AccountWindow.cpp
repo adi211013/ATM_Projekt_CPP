@@ -8,6 +8,7 @@
 
 AccountWindow::AccountWindow(BankSystem *bankSystem, QWidget *loginWindow, QWidget *parent)
     : QWidget(parent), bankSystem(bankSystem), loginWindow(loginWindow) {
+    setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle("Bankomat");
     resize(1200, 800);
 
