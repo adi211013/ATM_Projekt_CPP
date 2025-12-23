@@ -13,7 +13,7 @@ find_package(Qt6 COMPONENTS
         Widgets
         REQUIRED)
 
-add_executable(ATM_PROJEKT source/main.cpp
+add_executable(ATM_PROJEKT WIN32 source/main.cpp
         source/MainWindow.cpp
         headers/MainWindow.h
         source/Account.cpp

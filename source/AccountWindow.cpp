@@ -136,10 +136,35 @@ void AccountWindow::onWithdrawClicked() {
             QMessageBox::critical(this, "Błąd bankomatu",
                                   "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
             break;
-        case WithdrawResult::InvalidAmount:
+        case WithdrawResult::InsufficientFunds:
             QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Nie można wypłacić takiej kwoty.\n");
+                                  "Nie ma wystarczajacych srodkow na koncie.\n");
             amountDisplay->clear();
+            break;
+		case WithdrawResult::DailyLimitExceeded:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                                  "Przekroczono dzienny limit wypłat.\n");
+            amountDisplay->clear();
+			break;
+        case WithdrawResult::MonthlyLimitExceeded:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                                  "Przekroczono miesieczny limit wypłat.\n");
+			amountDisplay->clear();
+			break;
+        case WithdrawResult::CardLimitExceeded:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                                  "Przekroczono limit jednorazowej wypłaty karty.\n");
+            amountDisplay->clear();
+			break;
+        case WithdrawResult::AmountNotDivisible:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                                  "Nie można wypłacić kwoty nie dzielącej się przez 10.\n");
+            amountDisplay->clear();
+			break;
+        case WithdrawResult::AmountTooLow:
+            QMessageBox::critical(this, "Błąd wypłaty",
+                                  "FAIL: Nie mozna wyplacic kwoty mniejszej od 50zl.\n");
+			amountDisplay->clear();
             break;
         case WithdrawResult::AuthError:
             QMessageBox::critical(this, "Błąd sesji", "Wystapil blad autoryzacji, zaloguj sie ponownie");
@@ -148,5 +173,6 @@ void AccountWindow::onWithdrawClicked() {
             break;
         default:
             QMessageBox::critical(this, "Wystapil problem", "");
+            break;
     }
 }

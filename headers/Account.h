@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <QDate>
-
+#include "WithdrawResult.h"
 class Account {
     int cardNumber;
     int pin;
@@ -45,7 +45,7 @@ public:
 
     void checkAndResetLimits();
 
-    bool canWithdraw(const int amount) const;
+    WithdrawResult canWithdraw(const int amount) const;
 
     void recordWithdrawal(int amount);
 };

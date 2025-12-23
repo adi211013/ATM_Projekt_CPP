@@ -130,20 +130,20 @@ void Account::checkAndResetLimits() {
     }
 }
 
-bool Account::canWithdraw(const int amount) const {
+WithdrawResult Account::canWithdraw(const int amount) const {
     if (amount > balance)
-        return false;
+        return WithdrawResult::InsufficientFunds;
     if (amount > cardWithdrawalLimit)
-        return false;
+        return WithdrawResult::CardLimitExceeded;
     if (dailyWithdrawnAmount + amount > dailyWithdrawalLimit)
-        return false;
+        return WithdrawResult::DailyLimitExceeded;
     if (monthlyWithdrawnAmount + amount > monthlyWithdrawalLimit)
-        return false;
+        return WithdrawResult::MonthlyLimitExceeded;
     if (amount % 10 != 0)
-        return false;
+        return WithdrawResult::AmountNotDivisible;
     if (amount < 50)
-        return false;
-    return true;
+        return WithdrawResult::AmountTooLow;
+    return WithdrawResult::Success;
 }
 
 void Account::recordWithdrawal(int amount) {
