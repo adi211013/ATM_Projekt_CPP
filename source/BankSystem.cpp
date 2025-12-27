@@ -67,7 +67,7 @@ WithdrawResult BankSystem::withdraw(int amount, std::map<int, int>& outNotes) {
             std::string msg = "FAIL: Nieznany blad";
             switch (accStatus) {
             case WithdrawResult::InsufficientFunds: msg = "FAIL: Brak srodkow"; break;
-            case WithdrawResult::DailyLimitExceeded: msg = "FAIL: Limit dzienny"; break; // Tu był błąd SUCCESS
+            case WithdrawResult::DailyLimitExceeded: msg = "FAIL: Limit dzienny"; break; 
             case WithdrawResult::MonthlyLimitExceeded: msg = "FAIL: Limit miesieczny"; break;
             case WithdrawResult::CardLimitExceeded: msg = "FAIL: Limit karty"; break;
             case WithdrawResult::AmountNotDivisible: msg = "FAIL: Kwota niepodzielna przez 10"; break;
