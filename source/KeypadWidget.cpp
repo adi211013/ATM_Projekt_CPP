@@ -88,7 +88,7 @@ void KeypadWidget::setErrorLabelText(const QString &text) {
     errorLabel->setText(text);
     errorLabel->show();
     this->setEnabled(false);
-    QTimer::singleShot(3000, this, [this]() {
+    QTimer::singleShot(1000, this, [this]() {
         this->setEnabled(true);
         errorLabel->hide();
     });

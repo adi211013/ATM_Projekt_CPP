@@ -28,11 +28,9 @@ AccountWindow::AccountWindow(BankSystem *bankSystem, QWidget *loginWindow, QWidg
     connect(keypad, &KeypadWidget::confirmClicked, this, &AccountWindow::onWithdrawClicked);
     connect(keypad, &KeypadWidget::sideButtonClicked, this, &AccountWindow::onSideButtonClicked);
 }
-
 AccountWindow::~AccountWindow() {
     loginWindow->show();
 }
-
 void AccountWindow::onSideButtonClicked(int index) {
     switch (index) {
         case 0:
@@ -83,7 +81,7 @@ void AccountWindow::onWithdrawClicked() {
             }
             keypad->setErrorLabelText(info);
             keypad->setScreenText("");
-            QTimer::singleShot(2000,this,[this]() {
+            QTimer::singleShot(1000,this,[this]() {
             this->close();
             });
             break;

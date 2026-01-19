@@ -50,10 +50,16 @@ void MainWindow::cardSelected() {
             pinEnter();
             break;
         case LoginResult::InvalidCardNumber:
-
+            cardLabel->setText("Wystapil blad, bledny numer karty");
+            QTimer::singleShot(1000, this, [this]() {
+                cardLabel->setText("Wybierz karte z listy");
+                });
             break;
         case LoginResult::Blocked:
-            //napisac na ekrenie ze skontaktuj sie z bankiem
+            cardLabel->setText("Konto zablokowane, skontaktuj sie z bankiem");
+            QTimer::singleShot(1000, this, [this]() {
+                cardLabel->setText("Wybierz karte z listy");
+                });
             break;
         default:
             break;
@@ -78,7 +84,7 @@ void MainWindow::confirmClicked() {
     switch (result) {
         case LoginResult::Success: {
             keypad->setErrorLabelText("Zostales zalogowany");
-            QTimer::singleShot(200,this,[this]() {
+            QTimer::singleShot(1000,this,[this]() {
                 AccountWindow *accountWindow = new AccountWindow(bankSystem, this);
                 accountWindow->show();
                 this->hide();
@@ -91,7 +97,7 @@ void MainWindow::confirmClicked() {
             keypad->setErrorLabelText("Podano bledny pin, po 3 nieudanych probach konto zostanie zablokowane");
             break;
         case LoginResult::Blocked:
-                        QTimer::singleShot(200,this,[this]() {
+                        QTimer::singleShot(1000,this,[this]() {
                 clear();
             });
             keypad->setErrorLabelText("Podales bledny pin 3 razy, konto zostanie zablokowane");
