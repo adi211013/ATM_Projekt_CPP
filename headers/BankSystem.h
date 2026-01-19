@@ -30,6 +30,6 @@ public:
     int getFailedAttempts();
 
     WithdrawResult withdraw(int amount, std::map<int, int> &outNotes);
-
+    std::vector<int> getCardsNumber();
     int getBalance();
 };

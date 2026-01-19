@@ -20,6 +20,13 @@ BankSystem::~BankSystem() {
     ATM::pushATM(atm);
     Account::pushAccounts(accounts);
 }
+std::vector<int> BankSystem::getCardsNumber() {
+    std::vector<int> cardNumber;
+    for (const auto &account : accounts) {
+        cardNumber.push_back(account.getCardNumber());
+    }
+    return cardNumber;
+}
 
 LoginResult BankSystem::enterCard(int cardNumber) {
     pendingAccount = nullptr;

@@ -5,117 +5,72 @@
 #include "../headers/AccountWindow.h"
 
 #include <QMessageBox>
+#include <QTimer>
 
 AccountWindow::AccountWindow(BankSystem *bankSystem, QWidget *loginWindow, QWidget *parent)
     : QWidget(parent), bankSystem(bankSystem), loginWindow(loginWindow) {
     setAttribute(Qt::WA_DeleteOnClose);
     setWindowTitle("Bankomat");
     resize(1200, 800);
-
-    balanceLabel = new QLabel(this);
-    balanceLabel->setAlignment(Qt::AlignCenter);
-    balanceLabel->setStyleSheet("font-size: 22px; font-weight: bold; color: #4CAF50;");
-    balanceLabel->setText("Dostępne środki: " + QString::number(bankSystem->getBalance()) + " PLN");
-
-    infoLabel = new QLabel("Wybierz kwote do wypłaty:", this);
-    infoLabel->setAlignment(Qt::AlignCenter);
-    infoLabel->setStyleSheet("font-size: 22px;");
-
-    amountDisplay = new QLineEdit(this);
-    amountDisplay->setReadOnly(true);
-    amountDisplay->setAlignment(Qt::AlignCenter);
-    amountDisplay->setStyleSheet("font-size: 30px; padding: 10px;");
-    amountDisplay->setPlaceholderText("0 PLN");
-    //szybka wyplata
-    //50zl
-    button50 = new QPushButton(this);
-    button50->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    button50->setStyleSheet("font-size: 20px; font-weight: bold;");
-    button50->setText("50zl");
-    //100zl
-    button100 = new QPushButton(this);
-    button100->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    button100->setStyleSheet("font-size: 20px; font-weight: bold;");
-    button100->setText("100zl");
-    //200zl
-    button200 = new QPushButton(this);
-    button200->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    button200->setStyleSheet("font-size: 20px; font-weight: bold;");
-    button200->setText("200zl");
-    //500zl
-    button500 = new QPushButton(this);
-    button500->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    button500->setStyleSheet("font-size: 20px; font-weight: bold;");
-    button500->setText("500zl");
-    //inna kwota
-    otherButton = new QPushButton(this);
-    otherButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    otherButton->setStyleSheet("font-size: 20px; font-weight: bold;");
-    otherButton->setText("Inna kwota");
-    fastPaymentContainer = new QWidget(this);
-    fastPaymentLayout = new QGridLayout(fastPaymentContainer);
-    fastPaymentLayout->addWidget(button50, 0, 0);
-    fastPaymentLayout->addWidget(button100, 0, 1);
-    fastPaymentLayout->addWidget(button200, 1, 0);
-    fastPaymentLayout->addWidget(button500, 1, 1);
-    fastPaymentLayout->addWidget(otherButton, 2, 0, 1, 2);
-    //connect
-    connect(button50, &QPushButton::clicked, this, [this]() {
-        amountDisplay->setText("50");
-        onWithdrawClicked();
-    });
-    connect(button100, &QPushButton::clicked, this, [this]() {
-        amountDisplay->setText("100");
-        onWithdrawClicked();
-    });
-    connect(button200, &QPushButton::clicked, this, [this]() {
-        amountDisplay->setText("200");
-        onWithdrawClicked();
-    });
-    connect(button500, &QPushButton::clicked, this, [this]() {
-        amountDisplay->setText("500");
-        onWithdrawClicked();
-    });
-    connect(otherButton, &QPushButton::clicked, this, [this]() {
-        fastPaymentContainer->hide();
-        infoLabel->setText("Wpisz kwote do wypłaty:");
-        keypad = new KeypadWidget(this);
-        mainLayout->addWidget(keypad);
-        amountDisplay->show();
-        mainLayout->setStretch(0, 0);
-        mainLayout->setStretch(1, 0);
-        mainLayout->setStretch(2, 1);
-        mainLayout->setStretch(3, 2);
-
-        connect(keypad, &KeypadWidget::digitClicked, this, &AccountWindow::onDigitClicked);
-        connect(keypad, &KeypadWidget::backClicked, this, &AccountWindow::onBackspaceClicked);
-        connect(keypad, &KeypadWidget::confirmClicked, this, &AccountWindow::onWithdrawClicked);
-    });
-
     mainLayout = new QVBoxLayout(this);
-    mainLayout->addWidget(balanceLabel);
-    mainLayout->addWidget(infoLabel);
-    mainLayout->addWidget(amountDisplay);
-    amountDisplay->hide();
-    mainLayout->addWidget(fastPaymentContainer);
-    mainLayout->setStretch(0, 0);
-    mainLayout->setStretch(1, 0);
-    mainLayout->setStretch(2, 1);
+    keypad = new KeypadWidget(this);
+    keypad->setScreenText(
+        "Dostępne środki: " + QString::number(bankSystem->getBalance()) + " PLN\n Wpisz kwote wyplaty");
+    keypad->setSideButtonText("50PLN", 0);
+    keypad->setSideButtonText("100PLN", 1);
+    keypad->setSideButtonText("150PLN", 2);
+    keypad->setSideButtonText("200PLN", 3);
+    keypad->setSideButtonText("250PLN", 4);
+    keypad->setSideButtonText("300PLN", 5);
+    keypad->setSideButtonText("500PLN", 6);
+    keypad->setSideButtonText("Wyjscie", 7);
+    mainLayout->addWidget(keypad);
+    connect(keypad, &KeypadWidget::confirmClicked, this, &AccountWindow::onWithdrawClicked);
+    connect(keypad, &KeypadWidget::sideButtonClicked, this, &AccountWindow::onSideButtonClicked);
 }
 
 AccountWindow::~AccountWindow() {
+    loginWindow->show();
 }
 
-void AccountWindow::onDigitClicked(const QString &digit) {
-    amountDisplay->setText(amountDisplay->text() + digit);
-}
-
-void AccountWindow::onBackspaceClicked() {
-    amountDisplay->backspace();
+void AccountWindow::onSideButtonClicked(int index) {
+    switch (index) {
+        case 0:
+            keypad->setInputText("50");
+            onWithdrawClicked();
+            break;
+        case 1:
+            keypad->setInputText("100");
+            onWithdrawClicked();
+            break;
+        case 2:
+            keypad->setInputText("150");
+            onWithdrawClicked();
+            break;
+        case 3:
+            keypad->setInputText("200");
+            onWithdrawClicked();
+            break;
+        case 4:
+            keypad->setInputText("250");
+            onWithdrawClicked();
+            break;
+        case 5:
+            keypad->setInputText("300");
+            onWithdrawClicked();
+            break;
+        case 6:
+            keypad->setInputText("500");
+            onWithdrawClicked();
+            break;
+        case 7:
+            this->close();
+            break;
+    }
 }
 
 void AccountWindow::onWithdrawClicked() {
-    int amount = amountDisplay->text().toInt();
+    int amount = keypad->getInputText().toInt();
     std::map<int, int> notesToGive;
     WithdrawResult result = bankSystem->withdraw(amount, notesToGive);
     switch (result) {
@@ -126,50 +81,45 @@ void AccountWindow::onWithdrawClicked() {
                 if (count != 0)
                     info += QString::number(nominal) + " PLN x " + QString::number(count) + "\n";
             }
-            QMessageBox::information(this, "Gotówka", info);
-            amountDisplay->clear();
-            loginWindow->show();
+            keypad->setErrorLabelText(info);
+            keypad->setScreenText("");
+            QTimer::singleShot(2000,this,[this]() {
             this->close();
+            });
             break;
         }
         case WithdrawResult::ATMError:
-            QMessageBox::critical(this, "Błąd bankomatu",
-                                  "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
+            keypad->setErrorLabelText(
+                "Przepraszamy, bankomat nie posiada odpowiednich banknotów, aby wydać tę kwotę.\n");
             break;
         case WithdrawResult::InsufficientFunds:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Nie ma wystarczajacych srodkow na koncie.\n");
-            amountDisplay->clear();
+            keypad->setErrorLabelText("Nie ma wystarczajacych srodkow na koncie.\n");
+            keypad->clearInputText();
             break;
-		case WithdrawResult::DailyLimitExceeded:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Przekroczono dzienny limit wypłat.\n");
-            amountDisplay->clear();
-			break;
+        case WithdrawResult::DailyLimitExceeded:
+            keypad->setErrorLabelText("Przekroczono dzienny limit wypłat.\n");
+            keypad->clearInputText();
+            break;
         case WithdrawResult::MonthlyLimitExceeded:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Przekroczono miesieczny limit wypłat.\n");
-			amountDisplay->clear();
-			break;
+            keypad->setErrorLabelText("Przekroczono miesieczny limit wypłat.\n");
+            keypad->clearInputText();
+            break;
         case WithdrawResult::CardLimitExceeded:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Przekroczono limit jednorazowej wypłaty karty.\n");
-            amountDisplay->clear();
-			break;
+            keypad->setErrorLabelText("Przekroczono limit jednorazowej wypłaty karty.\n");
+            keypad->clearInputText();
+            break;
         case WithdrawResult::AmountNotDivisible:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "Nie można wypłacić kwoty nie dzielącej się przez 10.\n");
-            amountDisplay->clear();
-			break;
+            keypad->setErrorLabelText("Nie można wypłacić kwoty nie dzielącej się przez 10.\n");
+            keypad->clearInputText();
+            break;
         case WithdrawResult::AmountTooLow:
-            QMessageBox::critical(this, "Błąd wypłaty",
-                                  "FAIL: Nie mozna wyplacic kwoty mniejszej od 50zl.\n");
-			amountDisplay->clear();
+            keypad->setErrorLabelText("FAIL: Nie mozna wyplacic kwoty mniejszej od 50zl.\n");
+            keypad->clearInputText();
             break;
         case WithdrawResult::AuthError:
-            QMessageBox::critical(this, "Błąd sesji", "Wystapil blad autoryzacji, zaloguj sie ponownie");
+            keypad->setErrorLabelText("Wystapil blad autoryzacji, zaloguj sie ponownie");
             this->close();
-            loginWindow->show();
+            keypad->clearInputText();
             break;
         default:
             QMessageBox::critical(this, "Wystapil problem", "");

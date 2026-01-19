@@ -4,6 +4,9 @@
 #include <QLineEdit>
 #include <QLabel>
 #include "BankSystem.h"
+#include <QComboBox>
+
+#include "AccountWindow.h"
 class QPushButton;
 class QVBoxLayout;
 
@@ -16,14 +19,18 @@ public:
     ~MainWindow() override;
 
 private:
+    QComboBox *cardSelector;
     QVBoxLayout *mainLayout;
-    QLabel *cardLabel, *pinLabel;
-    QLineEdit *cardDisplay, *pinDisplay;
+    QWidget *cardSelectionContainer;
+    QLabel *cardLabel;
     BankSystem *bankSystem;
-    bool cardOk;
-
+    std::vector<int> cards;
+    QPushButton *putCard;
+    KeypadWidget *keypad;
+    void pinEnter();
     void clear();
 
 private slots:
     void confirmClicked();
+    void cardSelected();
 };
