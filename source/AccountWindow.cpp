@@ -81,7 +81,7 @@ void AccountWindow::onWithdrawClicked() {
             }
             keypad->setErrorLabelText(info);
             keypad->setScreenText("");
-            QTimer::singleShot(1000,this,[this]() {
+            QTimer::singleShot(2000,this,[this]() {
             this->close();
             });
             break;

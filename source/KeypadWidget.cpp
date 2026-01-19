@@ -49,7 +49,7 @@ KeypadWidget::KeypadWidget(QWidget *parent): QWidget(parent) {
         button->setStyleSheet("font-size: 20px; font-weight: bold;");
         keypad.append(button);
         connect(button, &QPushButton::clicked, this, [this, buttonText]() {
-            inputDisplay->setText(inputDisplay->text() + buttonText); // <-- TO JEST WAŻNE
+            inputDisplay->setText(inputDisplay->text() + buttonText);
             emit digitClicked(buttonText);
         });
     }
@@ -88,7 +88,7 @@ void KeypadWidget::setErrorLabelText(const QString &text) {
     errorLabel->setText(text);
     errorLabel->show();
     this->setEnabled(false);
-    QTimer::singleShot(1000, this, [this]() {
+    QTimer::singleShot(2000, this, [this]() {
         this->setEnabled(true);
         errorLabel->hide();
     });

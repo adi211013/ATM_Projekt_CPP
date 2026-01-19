@@ -51,13 +51,13 @@ void MainWindow::cardSelected() {
             break;
         case LoginResult::InvalidCardNumber:
             cardLabel->setText("Wystapil blad, bledny numer karty");
-            QTimer::singleShot(1000, this, [this]() {
+            QTimer::singleShot(2000, this, [this]() {
                 cardLabel->setText("Wybierz karte z listy");
                 });
             break;
         case LoginResult::Blocked:
             cardLabel->setText("Konto zablokowane, skontaktuj sie z bankiem");
-            QTimer::singleShot(1000, this, [this]() {
+            QTimer::singleShot(2000, this, [this]() {
                 cardLabel->setText("Wybierz karte z listy");
                 });
             break;
@@ -84,7 +84,7 @@ void MainWindow::confirmClicked() {
     switch (result) {
         case LoginResult::Success: {
             keypad->setErrorLabelText("Zostales zalogowany");
-            QTimer::singleShot(1000,this,[this]() {
+            QTimer::singleShot(2000,this,[this]() {
                 AccountWindow *accountWindow = new AccountWindow(bankSystem, this);
                 accountWindow->show();
                 this->hide();
